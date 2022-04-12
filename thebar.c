@@ -33,22 +33,24 @@ int main(int argc, char **argv)
 		printBanner();
 		init(); // initialize semaphores
 
+		pthread_t bttid;
 		pthread_t tid[num_threads];
 		thread_args args[num_threads];
+
+		// TODO - fire off customer thread
 		for(int i = 0; i < num_threads; i++) {
 			args[i].customer = i;
 			pthread_create(&tid[i], NULL, customer, &args[i]);
-			pthread_create(&tid[i], NULL, bartender, NULL);
 		}
+
+		// TODO - fire off bartender thread
+		pthread_create(&bttid, NULL, bartender, NULL);
+
+		// TODO - wait for all threads to finish
 		for (int i = 0; i < num_threads; i++) {
         	pthread_join(tid[i], NULL);
     	}
-
-		// TODO - fire off customer thread
-
-		// TODO - fire off bartender thread
-
-		// TODO - wait for all threads to finish
+		pthread_join(bttid, NULL);
 
 		cleanup(); // cleanup and destroy semaphores
 	}
@@ -84,11 +86,12 @@ void init()
 	sem_unlink("/custArrive");
 	sem_unlink("/custOrders");
 	sem_unlink("/custBrowse");
+	sem_unlink("/custAtReg");
 	sem_unlink("/custPays");
-	sem_unlink("/custLeaves");
 	//bartender semaphores
 	sem_unlink("/btWait");
 	sem_unlink("/btMakeDrink");
+	sem_unlink("/btAtReg");
 	sem_unlink("/btPayed");
 
 	// TODO - create semaphores
@@ -99,11 +102,12 @@ void init()
 	custArrive = sem_open("/custArrive",  O_CREAT, 0600, 0);
 	custOrders = sem_open("/custOrders",  O_CREAT, 0600, 0);
 	custBrowse = sem_open("/custBrowse",  O_CREAT, 0600, 0);
+	custAtReg = sem_open("/custAtReg",  O_CREAT, 0600, 0);
 	custPays = sem_open("/custPays",  O_CREAT, 0600, 0);
-	custLeaves = sem_open("/custLeaves",  O_CREAT, 0600, 0);
 	//bartender semaphores
 	btWait = sem_open("/btWait",  O_CREAT, 0600, 0);
 	btMakeDrink = sem_open("/btMakeDrink",  O_CREAT, 0600, 0);
+	btAtReg = sem_open("/btAtReg",  O_CREAT, 0600, 0);
 	btPayed = sem_open("/btPayed",  O_CREAT, 0600, 0);
 }
 
@@ -120,11 +124,12 @@ void cleanup()
 	sem_close(custArrive);
 	sem_close(custOrders);
 	sem_close(custBrowse);
+	sem_close(custAtReg);
 	sem_close(custPays);
-	sem_close(custLeaves);
 	//bartender semaphores
 	sem_close(btWait);
 	sem_close(btMakeDrink);
+	sem_close(btAtReg);
 	sem_close(btPayed);
 
 	//unlink them also
@@ -135,10 +140,11 @@ void cleanup()
 	sem_unlink("/custArrive");
 	sem_unlink("/custOrders");
 	sem_unlink("/custBrowse");
+	sem_unlink("/custAtReg");
 	sem_unlink("/custPays");
-	sem_unlink("/custLeaves");
 	//bartender semaphores
 	sem_unlink("/btWait");
 	sem_unlink("/btMakeDrink");
+	sem_unlink("/btAtReg");
 	sem_unlink("/btPayed");
 }

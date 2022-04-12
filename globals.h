@@ -19,11 +19,12 @@ sem_t* custTravel;
 sem_t* custArrive;
 sem_t* custOrders;
 sem_t* custBrowse;
+sem_t* custAtReg;
 sem_t* custPays;
-sem_t* custLeaves;
 //bartender semaphores
 sem_t* btWait;
 sem_t* btMakeDrink;
+sem_t* btAtReg;
 sem_t* btPayed;
 
 #endif /* GLOBALS_H_ */

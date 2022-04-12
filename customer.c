@@ -38,9 +38,11 @@ void* customer(void* args)
 void custTravelToBar(unsigned int custID)
 {
 	//TODO - synchronize
+	sem_wait(mutex);
 	int randomNum = (rand() % (5000 - 20 + 1)) + 20;
 	usleep(randomNum);
 	printf("Cust %u\t\t\t\t\t\t\t\t\t\t\t|\n", custID);
+	sem_post(mutex);
 	sem_post(custTravel);
 }
 
@@ -52,13 +54,12 @@ void custTravelToBar(unsigned int custID)
 void custArriveAtBar(unsigned int custID)
 {
 	//TODO - synchronize
-	sem_wait(custTravel);
-	//while(num_threads != 0){ 
-		now_serving = custID;
-		printf("\t\tCust %u\t\t\t\t\t\t\t\t\t|\n", custID);
-		sem_post(custArrive);
-		//sem_wait(custLeaves);
-	//}
+	sem_wait(btWait);
+	sem_wait(mutex);
+	now_serving = custID;
+	printf("\t\tCust %u\t\t\t\t\t\t\t\t\t|\n", custID);
+	sem_post(mutex);
+	sem_post(custArrive);
 }
 
 
@@ -68,10 +69,11 @@ void custArriveAtBar(unsigned int custID)
 void custPlaceOrder()
 {
 	//TODO - synchronize
-	sem_wait(btWait);
+	sem_wait(custArrive);
+	sem_wait(mutex);
 	printf("\t\t\t\tCust %u\t\t\t\t\t\t\t|\n", now_serving);
+	sem_post(mutex);
 	sem_post(custBrowse);
-	sem_post(custOrders);
 }
 
 
@@ -82,9 +84,13 @@ void custBrowseArt()
 {
 	//TODO - synchronize
 	sem_wait(custBrowse);
+	sem_wait(mutex);
 	int randomNum = (rand() % (4000 - 3 + 1)) + 3;
 	usleep(randomNum);
 	printf("\t\t\t\t\t\tCust %u\t\t\t\t\t|\n", now_serving);
+	sem_post(mutex);
+	sem_post(custOrders);
+	sem_post(custAtReg);
 }
 
 
@@ -96,8 +102,11 @@ void custBrowseArt()
 void custAtRegister()
 {
 	//TODO - synchronize
+	sem_wait(custAtReg);
 	sem_wait(btMakeDrink);
+	sem_wait(mutex);
 	printf("\t\t\t\t\t\t\t\tCust %u\t\t\t|\n", now_serving);
+	sem_post(mutex);
 	sem_post(custPays);
 }
 
@@ -109,7 +118,7 @@ void custLeaveBar()
 {
 	//TODO - synchronize
 	sem_wait(btPayed);
+	sem_wait(mutex);
 	printf("\t\t\t\t\t\t\t\t\t\tCust %u\t|\n", now_serving);
-	num_threads--;
-	sem_post(custLeaves);
+	sem_post(mutex);
 }
