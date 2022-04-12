@@ -38,11 +38,13 @@ void* customer(void* args)
 void custTravelToBar(unsigned int custID)
 {
 	//TODO - synchronize
+	//let the customers travel to the bar
 	sem_wait(mutex);
 	int randomNum = (rand() % (5000 - 20 + 1)) + 20;
 	usleep(randomNum);
 	printf("Cust %u\t\t\t\t\t\t\t\t\t\t\t|\n", custID);
 	sem_post(mutex);
+	//signal that the customers have gotten to the bar
 	sem_post(custTravel);
 }
 
@@ -54,11 +56,11 @@ void custTravelToBar(unsigned int custID)
 void custArriveAtBar(unsigned int custID)
 {
 	//TODO - synchronize
+	//wait for the bartender to be in a waiting stage
 	sem_wait(btWait);
-	sem_wait(mutex);
 	now_serving = custID;
 	printf("\t\tCust %u\t\t\t\t\t\t\t\t\t|\n", custID);
-	sem_post(mutex);
+	//singal that a customer has arrived
 	sem_post(custArrive);
 }
 
@@ -69,10 +71,10 @@ void custArriveAtBar(unsigned int custID)
 void custPlaceOrder()
 {
 	//TODO - synchronize
+	//wait for a customer to arrive
 	sem_wait(custArrive);
-	sem_wait(mutex);
 	printf("\t\t\t\tCust %u\t\t\t\t\t\t\t|\n", now_serving);
-	sem_post(mutex);
+	//signal for the customer to browse around after ordering
 	sem_post(custBrowse);
 }
 
@@ -83,13 +85,14 @@ void custPlaceOrder()
 void custBrowseArt()
 {
 	//TODO - synchronize
+	//wait for a customer to browse until they order
 	sem_wait(custBrowse);
-	sem_wait(mutex);
 	int randomNum = (rand() % (4000 - 3 + 1)) + 3;
 	usleep(randomNum);
 	printf("\t\t\t\t\t\tCust %u\t\t\t\t\t|\n", now_serving);
-	sem_post(mutex);
+	//signal that a customer orders so the bt can start mixing the drinks
 	sem_post(custOrders);
+	//signal for the customer to go to the register
 	sem_post(custAtReg);
 }
 
@@ -102,11 +105,12 @@ void custBrowseArt()
 void custAtRegister()
 {
 	//TODO - synchronize
+	//wait for a customer to finish browsing
 	sem_wait(custAtReg);
+	//wait for a bt to finish making the drinks
 	sem_wait(btMakeDrink);
-	sem_wait(mutex);
 	printf("\t\t\t\t\t\t\t\tCust %u\t\t\t|\n", now_serving);
-	sem_post(mutex);
+	//signal that the customer has payed
 	sem_post(custPays);
 }
 
@@ -117,8 +121,9 @@ void custAtRegister()
 void custLeaveBar()
 {
 	//TODO - synchronize
+	//wait for the bt to get the right payment
 	sem_wait(btPayed);
-	sem_wait(mutex);
 	printf("\t\t\t\t\t\t\t\t\t\tCust %u\t|\n", now_serving);
+	//mutex is finished for this customer
 	sem_post(mutex);
 }

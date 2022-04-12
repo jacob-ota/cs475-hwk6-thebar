@@ -33,6 +33,7 @@ int main(int argc, char **argv)
 		printBanner();
 		init(); // initialize semaphores
 
+		//create threads for the bt and the customers
 		pthread_t bttid;
 		pthread_t tid[num_threads];
 		thread_args args[num_threads];
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 		// TODO - fire off bartender thread
 		pthread_create(&bttid, NULL, bartender, NULL);
 
-		// TODO - wait for all threads to finish
+		// TODO - wait for all threads to finish and join them together
 		for (int i = 0; i < num_threads; i++) {
         	pthread_join(tid[i], NULL);
     	}
@@ -54,7 +55,11 @@ int main(int argc, char **argv)
 
 		cleanup(); // cleanup and destroy semaphores
 	}
+	else if(atoi(argv[1]) == 0) {
+		printf("No customers arrived :( \n");
+	}
 	else {
+		//if negative then signal that it is a neg amount
 		printf("Cannot have a negative amount of customers\n");
 	}
 	return 0;

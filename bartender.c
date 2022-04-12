@@ -36,10 +36,12 @@ void* bartender(void* args)
 void waitForCustomer()
 {
 	//TODO - synchronize
+	//wait for customers to travel
 	sem_wait(custTravel);
+	//mutex everything from once all the customers travel to when a customer leaves
 	sem_wait(mutex);
 	printf("\t\t\t\t\t\t\t\t\t\t\t| Bartender\n");
-	sem_post(mutex);
+	//signal that the bartender is waiting
 	sem_post(btWait);
 }
 
@@ -51,12 +53,12 @@ void waitForCustomer()
 void makeDrink()
 {
 	//TODO - synchronize
+	//wait for the customer to order their drinks
 	sem_wait(custOrders);
-	sem_wait(mutex);
 	int randomNum = (rand() % (1000 - 5 + 1)) + 5;
 	usleep(randomNum);
 	printf("\t\t\t\t\t\t\t\t\t\t\t| \t\tBartender\n");
-	sem_post(mutex);
+	//signal for the bt to head to the register and that the drink is ready
 	sem_post(btAtReg);
 	sem_post(btMakeDrink);
 }
@@ -70,14 +72,11 @@ void receivePayment()
 	//TODO - synchronize
 	//at the register waiting for customer to pay
 	sem_wait(btAtReg);
-	sem_wait(mutex);
 	printf("\t\t\t\t\t\t\t\t\t\t\t| \t\t\t\tBartender\n");
-	sem_post(mutex);
 	//now wait for the customer to give money
 	sem_wait(custPays);
-	sem_wait(mutex);
 	//got the payment from the right customer!
 	printf("\t\t\t\t\t\t\t\t\t\t\t| \t\t\t\t\t\tBartender\n");
-	sem_post(mutex);
+	//signal that the bt got payed
 	sem_post(btPayed);
 }
